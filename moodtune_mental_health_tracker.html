@@ -1,0 +1,571 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  .app {
+    font-family: 'Inter', sans-serif;
+    background: #0D0F1A;
+    min-height: 600px;
+    color: #E8E6F0;
+    padding: 0;
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .bg-orbs {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; overflow: hidden; z-index: 0;
+  }
+  .orb {
+    position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.15;
+    transition: all 1.2s ease;
+  }
+  .orb-1 { width: 280px; height: 280px; top: -60px; left: -60px; background: #7C3AED; }
+  .orb-2 { width: 200px; height: 200px; top: 100px; right: -40px; background: #EC4899; }
+  .orb-3 { width: 160px; height: 160px; bottom: 40px; left: 30%; background: #14B8A6; }
+
+  .content { position: relative; z-index: 1; padding: 28px 24px 24px; }
+
+  .header {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 28px;
+  }
+  .logo-dot {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, #7C3AED, #EC4899);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+  .brand { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: -0.3px; color: #fff; }
+  .brand span { color: #A78BFA; }
+  .streak-badge {
+    margin-left: auto; background: rgba(167,139,250,0.15); border: 1px solid rgba(167,139,250,0.3);
+    border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 500; color: #C4B5FD;
+    display: flex; align-items: center; gap: 5px;
+  }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .section-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+    color: #6B7280; margin-bottom: 12px;
+  }
+
+  .question {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 22px; font-weight: 600; color: #F3F0FF;
+    line-height: 1.3; margin-bottom: 8px;
+  }
+  .sub { font-size: 14px; color: #9CA3AF; margin-bottom: 24px; }
+
+  .mood-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 24px;
+  }
+  .mood-btn {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px; padding: 14px 8px; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    transition: all 0.25s ease; text-align: center;
+  }
+  .mood-btn:hover { background: rgba(255,255,255,0.08); border-color: rgba(167,139,250,0.4); transform: translateY(-1px); }
+  .mood-btn.selected { background: rgba(167,139,250,0.15); border-color: #7C3AED; transform: translateY(-2px); box-shadow: 0 0 20px rgba(124,58,237,0.2); }
+  .mood-emoji { font-size: 28px; line-height: 1; }
+  .mood-label { font-size: 11px; font-weight: 500; color: #9CA3AF; }
+  .mood-btn.selected .mood-label { color: #C4B5FD; }
+
+  .energy-section { margin-bottom: 24px; }
+  .energy-label { font-size: 14px; color: #9CA3AF; margin-bottom: 12px; display: flex; justify-content: space-between; }
+  .energy-label span { color: #C4B5FD; font-weight: 600; }
+  .energy-bar {
+    -webkit-appearance: none; appearance: none;
+    width: 100%; height: 6px; border-radius: 3px;
+    background: rgba(255,255,255,0.08); outline: none; cursor: pointer;
+  }
+  .energy-bar::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%;
+    background: linear-gradient(135deg, #7C3AED, #EC4899); cursor: pointer;
+    box-shadow: 0 0 10px rgba(124,58,237,0.4);
+  }
+
+  .note-input {
+    width: 100%; background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08); border-radius: 12px;
+    padding: 12px 14px; color: #E8E6F0; font-family: 'Inter', sans-serif;
+    font-size: 14px; resize: none; margin-bottom: 20px; transition: border-color 0.2s;
+    outline: none;
+  }
+  .note-input::placeholder { color: #4B5563; }
+  .note-input:focus { border-color: rgba(167,139,250,0.4); }
+
+  .cta-btn {
+    width: 100%; padding: 14px; border-radius: 12px;
+    background: linear-gradient(135deg, #7C3AED, #6D28D9);
+    border: none; color: #fff; font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px; font-weight: 600; cursor: pointer;
+    transition: all 0.2s ease; letter-spacing: 0.2px;
+  }
+  .cta-btn:hover { background: linear-gradient(135deg, #8B5CF6, #7C3AED); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(124,58,237,0.3); }
+  .cta-btn:active { transform: translateY(0); }
+  .cta-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .result-header { text-align: center; margin-bottom: 24px; padding-top: 8px; }
+  .mood-orb {
+    width: 88px; height: 88px; border-radius: 50%; margin: 0 auto 16px;
+    display: flex; align-items: center; justify-content: center; font-size: 36px;
+    transition: all 0.6s ease; position: relative;
+  }
+  .mood-orb::after {
+    content: ''; position: absolute; inset: -6px; border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.1); animation: pulse-ring 2s ease-out infinite;
+  }
+  @keyframes pulse-ring {
+    0% { transform: scale(1); opacity: 0.6; }
+    100% { transform: scale(1.25); opacity: 0; }
+  }
+  .result-mood-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 24px; font-weight: 700; color: #F3F0FF; margin-bottom: 4px;
+  }
+  .result-insight { font-size: 13px; color: #9CA3AF; line-height: 1.5; max-width: 300px; margin: 0 auto; }
+
+  .vibe-tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(167,139,250,0.12); border: 1px solid rgba(167,139,250,0.2);
+    border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 500;
+    color: #C4B5FD; margin: 8px 4px 0;
+  }
+
+  .playlists-section { margin-bottom: 20px; }
+  .playlist-label { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: #6B7280; margin-bottom: 14px; }
+
+  .playlist-card {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 14px; padding: 14px 16px; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .playlist-art {
+    width: 52px; height: 52px; border-radius: 10px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 22px;
+  }
+  .playlist-info { flex: 1; min-width: 0; }
+  .playlist-name { font-weight: 500; font-size: 14px; color: #F3F0FF; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .playlist-desc { font-size: 12px; color: #6B7280; }
+  .platform-links { display: flex; gap: 6px; flex-shrink: 0; }
+  .platform-btn {
+    width: 32px; height: 32px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.05); display: flex; align-items: center;
+    justify-content: center; cursor: pointer; transition: all 0.2s; text-decoration: none;
+    font-size: 14px;
+  }
+  .platform-btn:hover { background: rgba(255,255,255,0.1); transform: scale(1.05); }
+  .platform-btn.spotify { border-color: rgba(30,215,96,0.3); }
+  .platform-btn.apple { border-color: rgba(252,60,68,0.3); }
+  .platform-btn.youtube { border-color: rgba(255,0,0,0.3); }
+  .platform-btn.amazon { border-color: rgba(0,168,232,0.3); }
+
+  .platform-legend { display: flex; gap: 12px; justify-content: center; margin-bottom: 18px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #6B7280; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  .history-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 20px; }
+  .history-day {
+    aspect-ratio: 1; border-radius: 8px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 2px;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
+    font-size: 10px; color: #4B5563;
+  }
+  .history-day.has-entry { cursor: pointer; }
+  .history-day .h-emoji { font-size: 16px; }
+  .history-day .h-label { font-size: 9px; }
+
+  .divider { border: none; border-top: 1px solid rgba(255,255,255,0.06); margin: 20px 0; }
+
+  .back-btn {
+    background: none; border: 1px solid rgba(255,255,255,0.1); color: #9CA3AF;
+    padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer;
+    font-family: 'Inter', sans-serif; transition: all 0.2s; margin-bottom: 20px;
+  }
+  .back-btn:hover { background: rgba(255,255,255,0.06); color: #E8E6F0; }
+
+  .tabs { display: flex; gap: 4px; margin-bottom: 24px; background: rgba(255,255,255,0.04); border-radius: 10px; padding: 4px; }
+  .tab-btn {
+    flex: 1; padding: 8px; border: none; background: none; color: #6B7280;
+    font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer;
+    border-radius: 8px; transition: all 0.2s;
+  }
+  .tab-btn.active { background: rgba(124,58,237,0.25); color: #C4B5FD; }
+
+  .insights-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .insight-card {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px; padding: 14px;
+  }
+  .insight-num { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; color: #C4B5FD; }
+  .insight-desc { font-size: 12px; color: #6B7280; margin-top: 3px; }
+
+  .breathe-circle {
+    width: 120px; height: 120px; border-radius: 50%; margin: 0 auto 16px;
+    background: radial-gradient(circle, rgba(167,139,250,0.3) 0%, rgba(124,58,237,0.1) 60%, transparent 70%);
+    border: 1.5px solid rgba(167,139,250,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 500; color: #C4B5FD;
+    animation: breathe-anim 4s ease-in-out infinite;
+  }
+  @keyframes breathe-anim {
+    0%, 100% { transform: scale(1); opacity: 0.7; }
+    50% { transform: scale(1.15); opacity: 1; }
+  }
+
+  .affirmation {
+    background: rgba(167,139,250,0.08); border: 1px solid rgba(167,139,250,0.15);
+    border-radius: 12px; padding: 16px; margin-bottom: 16px; text-align: center;
+    font-size: 14px; color: #C4B5FD; line-height: 1.6; font-style: italic;
+  }
+</style>
+
+<div class="app" id="app">
+  <div class="bg-orbs">
+    <div class="orb orb-1" id="orb1"></div>
+    <div class="orb orb-2" id="orb2"></div>
+    <div class="orb orb-3" id="orb3"></div>
+  </div>
+  <div class="content">
+    <div class="header">
+      <div class="logo-dot">🎵</div>
+      <div class="brand">Mood<span>Tune</span></div>
+      <div class="streak-badge">🔥 <span id="streak-count">3</span> day streak</div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('checkin')">Check-in</button>
+      <button class="tab-btn" onclick="switchTab('history')">History</button>
+      <button class="tab-btn" onclick="switchTab('insights')">Insights</button>
+      <button class="tab-btn" onclick="switchTab('tools')">Tools</button>
+    </div>
+
+    <div class="screen active" id="screen-checkin-main">
+      <p class="section-label">How are you feeling?</p>
+      <h2 class="question">Pick your mood right now</h2>
+      <p class="sub">Be honest — this is just for you</p>
+
+      <div class="mood-grid" id="mood-grid">
+        <button class="mood-btn" onclick="selectMood('joyful','😄','#14B8A6','Feeling amazing and alive')" data-mood="joyful">
+          <div class="mood-emoji">😄</div><div class="mood-label">Joyful</div>
+        </button>
+        <button class="mood-btn" onclick="selectMood('calm','😌','#6366F1','Serene and at peace')" data-mood="calm">
+          <div class="mood-emoji">😌</div><div class="mood-label">Calm</div>
+        </button>
+        <button class="mood-btn" onclick="selectMood('energized','⚡','#F59E0B','Ready to take on the world')" data-mood="energized">
+          <div class="mood-emoji">⚡</div><div class="mood-label">Energized</div>
+        </button>
+        <button class="mood-btn" onclick="selectMood('romantic','🥰','#EC4899','Full of warmth and love')" data-mood="romantic">
+          <div class="mood-emoji">🥰</div><div class="mood-label">Romantic</div>
+        </button>
+        <button class="mood-btn" onclick="selectMood('anxious','😰','#F97316','Worried and restless')" data-mood="anxious">
+          <div class="mood-emoji">😰</div><div class="mood-label">Anxious</div>
+        </button>
+        <button class="mood-btn" onclick="selectMood('sad','😢','#3B82F6','Feeling low and blue')" data-mood="sad">
+          <div class="mood-emoji">😢</div><div class="mood-label">Sad</div>
+        </button>
+        <button class="mood-btn" onclick="selectMood('focused','🎯','#8B5CF6','In the zone, sharp')" data-mood="focused">
+          <div class="mood-emoji">🎯</div><div class="mood-label">Focused</div>
+        </button>
+        <button class="mood-btn" onclick="selectMood('tired','😴','#6B7280','Drained and exhausted')" data-mood="tired">
+          <div class="mood-emoji">😴</div><div class="mood-label">Tired</div>
+        </button>
+      </div>
+
+      <div class="energy-section">
+        <div class="energy-label">Energy level <span id="energy-val">5</span>/10</div>
+        <input type="range" class="energy-bar" id="energy-slider" min="1" max="10" value="5" oninput="document.getElementById('energy-val').textContent=this.value">
+      </div>
+
+      <textarea class="note-input" id="mood-note" rows="2" placeholder="Anything on your mind? (optional)"></textarea>
+
+      <button class="cta-btn" id="find-music-btn" onclick="findMusic()" disabled>Find my music →</button>
+    </div>
+
+    <div class="screen" id="screen-results">
+      <button class="back-btn" onclick="goBack()">← New check-in</button>
+
+      <div class="result-header">
+        <div class="mood-orb" id="result-orb">😄</div>
+        <div class="result-mood-name" id="result-mood-name">Joyful</div>
+        <div class="result-insight" id="result-insight">Feeling amazing and alive</div>
+        <div id="vibe-tags"></div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="playlists-section">
+        <div class="playlist-label">Curated for your vibe</div>
+        <div class="platform-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#1DB954"></div>Spotify</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#FC3C44"></div>Apple Music</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#FF0000"></div>YouTube Music</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#00A8E8"></div>Amazon Music</div>
+        </div>
+        <div id="playlist-list"></div>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-history">
+      <p class="section-label">Your mood journey</p>
+      <h2 class="question" style="font-size:18px; margin-bottom:16px">Past 7 days</h2>
+      <div class="history-grid" id="history-grid"></div>
+      <div id="history-log"></div>
+    </div>
+
+    <div class="screen" id="screen-insights">
+      <p class="section-label">Your patterns</p>
+      <h2 class="question" style="font-size:18px; margin-bottom:16px">Mood at a glance</h2>
+      <div class="insights-row">
+        <div class="insight-card"><div class="insight-num" id="most-common-emoji">😌</div><div class="insight-desc">Most common mood</div></div>
+        <div class="insight-card"><div class="insight-num" id="avg-energy">6.5</div><div class="insight-desc">Average energy level</div></div>
+      </div>
+      <div class="insights-row">
+        <div class="insight-card"><div class="insight-num" id="entries-count">4</div><div class="insight-desc">Check-ins total</div></div>
+        <div class="insight-card"><div class="insight-num" id="streak-num">3</div><div class="insight-desc">Day streak</div></div>
+      </div>
+      <div class="affirmation" id="affirmation-text">"Your feelings are valid. Every check-in is an act of self-care."</div>
+    </div>
+
+    <div class="screen" id="screen-tools">
+      <p class="section-label">Wellness tools</p>
+      <h2 class="question" style="font-size:18px; margin-bottom:6px">Breathe with me</h2>
+      <p class="sub">4-second cycles — inhale as it grows, exhale as it shrinks</p>
+      <div class="breathe-circle" id="breathe-label">Breathe in</div>
+      <div style="text-align:center; margin-bottom:24px;">
+        <button class="cta-btn" id="breathe-btn" style="width:auto; padding:10px 28px; display:inline-block" onclick="toggleBreathe()">Start breathing</button>
+      </div>
+      <hr class="divider">
+      <p class="section-label">Daily affirmation</p>
+      <div class="affirmation" id="tools-affirmation">"You are doing better than you think. Rest is productive."</div>
+      <button class="back-btn" style="width:100%; text-align:center" onclick="newAffirmation()">New affirmation</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const state = {
+  selectedMood: null, moodColor: null, moodInsight: null,
+  moodEmoji: null, energy: 5,
+  history: [
+    { day: 'Mon', emoji: '😌', mood: 'calm', color: '#6366F1' },
+    { day: 'Tue', emoji: '⚡', mood: 'energized', color: '#F59E0B' },
+    { day: 'Wed', emoji: '😢', mood: 'sad', color: '#3B82F6' },
+    { day: 'Thu', emoji: '😄', mood: 'joyful', color: '#14B8A6' }
+  ],
+  streak: 3, breatheActive: false, breatheTimer: null, breathePhase: 0,
+  entries: 4
+};
+
+const playlists = {
+  joyful: [
+    { name: 'Happy Vibes', desc: 'Upbeat feel-good anthems', emoji: '🌈', spotifyId: 'playlist/37i9dQZF1DXdPec7aLTmlC', appleMusicId: 'us/playlist/happy-pop-hits/pl.f4d106fed2bd41149ecdac479a05cddc', ytmId: 'happy+vibes+playlist', amazonId: 'happy+vibes' },
+    { name: 'Pure Joy', desc: 'Dance and smile all day', emoji: '🎉', spotifyId: 'playlist/37i9dQZF1DX0XUsuxWHRQd', appleMusicId: 'us/playlist/todays-hits/pl.f4d106fed2bd41149ecdac479a05cddc', ytmId: 'pure+joy+music', amazonId: 'pure+joy+music' },
+  ],
+  calm: [
+    { name: 'Peaceful Mind', desc: 'Gentle tones for quiet moments', emoji: '🌿', spotifyId: 'playlist/37i9dQZF1DX3Ogo9pFvBkY', appleMusicId: 'us/playlist/pure-meditation/pl.3a459f7835794c99bde48bd87c73b31c', ytmId: 'calm+peaceful+music', amazonId: 'calm+meditation' },
+    { name: 'Lo-fi Chill', desc: 'Laid-back beats to relax to', emoji: '☕', spotifyId: 'playlist/37i9dQZF1DWWQRwui0ExPn', appleMusicId: 'us/playlist/a-perfect-day/pl.d7de8e8286584947b15de6048ca77c3f', ytmId: 'lofi+chill+beats', amazonId: 'lofi+chill' },
+  ],
+  energized: [
+    { name: 'Power Surge', desc: 'High energy workout fuel', emoji: '💪', spotifyId: 'playlist/37i9dQZF1DX76Wlfdnj7AP', appleMusicId: 'us/playlist/pure-energy/pl.bf348d3471ad403e8b13f5b64bce5e28', ytmId: 'power+workout+music', amazonId: 'power+workout' },
+    { name: 'Motivation Mode', desc: 'Tracks to fire you up', emoji: '🚀', spotifyId: 'playlist/37i9dQZF1DX70RN3TfWWJh', appleMusicId: 'us/playlist/todays-hits/pl.f4d106fed2bd41149ecdac479a05cddc', ytmId: 'motivation+pump+up+music', amazonId: 'motivation+music' },
+  ],
+  romantic: [
+    { name: 'Love Language', desc: 'Tender songs for warm hearts', emoji: '💗', spotifyId: 'playlist/37i9dQZF1DX50QitC6Oqtn', appleMusicId: 'us/playlist/romance/pl.57a74ebe8ad347cabd8eecf55e4a1cff', ytmId: 'romantic+love+songs', amazonId: 'romantic+love+songs' },
+    { name: 'Soft Hours', desc: 'Dreamy R&B and soul', emoji: '🌙', spotifyId: 'playlist/37i9dQZF1DX2UgsUIg75Vg', appleMusicId: 'us/playlist/mood-booster/pl.0cf5c98f99124d0d89fd0a7d6e0c28e1', ytmId: 'soft+romantic+rnb', amazonId: 'soft+rnb' },
+  ],
+  anxious: [
+    { name: 'Calm Down', desc: 'Soothing sounds for anxious minds', emoji: '🫧', spotifyId: 'playlist/37i9dQZF1DWZqd5JICZI0u', appleMusicId: 'us/playlist/pure-meditation/pl.3a459f7835794c99bde48bd87c73b31c', ytmId: 'anxiety+relief+music', amazonId: 'anxiety+relief' },
+    { name: 'Ground Me', desc: 'Nature sounds and gentle piano', emoji: '🌲', spotifyId: 'playlist/37i9dQZF1DX4sWSpwq3LiO', appleMusicId: 'us/playlist/stress-relief/pl.b76c9c9da8b748a4b8fb9b3e9d5b37c', ytmId: 'grounding+calm+music', amazonId: 'calming+nature' },
+  ],
+  sad: [
+    { name: 'Feel It Out', desc: 'Music to let the feelings flow', emoji: '🌧', spotifyId: 'playlist/37i9dQZF1DX7gIoKXt0gmx', appleMusicId: 'us/playlist/broken-heart/pl.42f5c5a6e6f04bd09a9a2f6f4a9f9e8c', ytmId: 'sad+music+for+crying', amazonId: 'sad+emotional+music' },
+    { name: 'Healing Hours', desc: 'Gentle music for tender days', emoji: '💙', spotifyId: 'playlist/37i9dQZF1DX3YSRoSdA634', appleMusicId: 'us/playlist/healing/pl.97c6f6e0f5484cba8b23f96289e3f6e1', ytmId: 'healing+music', amazonId: 'healing+music' },
+  ],
+  focused: [
+    { name: 'Deep Focus', desc: 'Zero distractions, pure flow', emoji: '🎯', spotifyId: 'playlist/37i9dQZF1DWZeKCadgRdKQ', appleMusicId: 'us/playlist/focus-flow/pl.3a8f6ed3a65a4b65a84da5a5dc4b00d2', ytmId: 'deep+focus+study+music', amazonId: 'deep+focus' },
+    { name: 'Flow State', desc: 'Instrumental beats for creation', emoji: '✨', spotifyId: 'playlist/37i9dQZF1DX8NTLI2TtZa6', appleMusicId: 'us/playlist/perfect-concentration/pl.59e11ba6c9f3424a9cdb35f0adbc4e0e', ytmId: 'flow+state+instrumental', amazonId: 'flow+state+music' },
+  ],
+  tired: [
+    { name: 'Gentle Rise', desc: 'Soft nudge to ease back in', emoji: '🌅', spotifyId: 'playlist/37i9dQZF1DXaXB8fQg7xof', appleMusicId: 'us/playlist/pure-relaxation/pl.d7de8e8286584947b15de6048ca77c3f', ytmId: 'gentle+morning+music', amazonId: 'gentle+rise+music' },
+    { name: 'Rest Well', desc: 'Wind down and restore', emoji: '🌙', spotifyId: 'playlist/37i9dQZF1DWZd79rJ6a7lp', appleMusicId: 'us/playlist/sleep/pl.c34f6ab5a26f4dbf8e4e7e57f0f0f9c8', ytmId: 'sleep+rest+music', amazonId: 'sleep+music' },
+  ]
+};
+
+const vibes = {
+  joyful: ['Feel-Good', 'Upbeat', 'Dance-Ready'],
+  calm: ['Mellow', 'Peaceful', 'Mindful'],
+  energized: ['High-Energy', 'Power', 'Motivating'],
+  romantic: ['Soft', 'Heartfelt', 'Dreamy'],
+  anxious: ['Soothing', 'Grounding', 'Gentle'],
+  sad: ['Cathartic', 'Tender', 'Healing'],
+  focused: ['Flow', 'Instrumental', 'Concentration'],
+  tired: ['Restorative', 'Gentle', 'Calming']
+};
+
+const affirmations = [
+  '"You are doing better than you think. Rest is productive."',
+  '"Small steps forward are still steps forward."',
+  '"Your feelings are valid. Every check-in is an act of self-care."',
+  '"It\'s okay to not be okay. Healing is not linear."',
+  '"You have survived every difficult day so far. Keep going."',
+  '"Be gentle with yourself. You are a work in progress — and that\'s beautiful."',
+  '"One moment at a time is enough."',
+  '"Your worth is not measured by your productivity."'
+];
+
+function selectMood(mood, emoji, color, insight) {
+  state.selectedMood = mood;
+  state.moodEmoji = emoji;
+  state.moodColor = color;
+  state.moodInsight = insight;
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelector('[data-mood="' + mood + '"]').classList.add('selected');
+  document.getElementById('find-music-btn').disabled = false;
+  const orb1 = document.getElementById('orb1');
+  orb1.style.background = color;
+}
+
+function findMusic() {
+  const mood = state.selectedMood;
+  document.getElementById('result-orb').textContent = state.moodEmoji;
+  document.getElementById('result-orb').style.background = state.moodColor + '33';
+  document.getElementById('result-orb').style.boxShadow = '0 0 40px ' + state.moodColor + '44';
+  document.getElementById('result-mood-name').textContent = mood.charAt(0).toUpperCase() + mood.slice(1);
+  document.getElementById('result-insight').textContent = state.moodInsight;
+
+  const tagsEl = document.getElementById('vibe-tags');
+  tagsEl.innerHTML = vibes[mood].map(v => '<span class="vibe-tag">' + v + '</span>').join('');
+
+  const list = document.getElementById('playlist-list');
+  list.innerHTML = (playlists[mood] || []).map(p => `
+    <div class="playlist-card">
+      <div class="playlist-art" style="background:${state.moodColor}22">${p.emoji}</div>
+      <div class="playlist-info">
+        <div class="playlist-name">${p.name}</div>
+        <div class="playlist-desc">${p.desc}</div>
+      </div>
+      <div class="platform-links">
+        <a class="platform-btn spotify" href="https://open.spotify.com/${p.spotifyId}" title="Spotify" target="_blank">🎵</a>
+        <a class="platform-btn apple" href="https://music.apple.com/${p.appleMusicId}" title="Apple Music" target="_blank">🍎</a>
+        <a class="platform-btn youtube" href="https://music.youtube.com/search?q=${p.ytmId}" title="YouTube Music" target="_blank">▶</a>
+        <a class="platform-btn amazon" href="https://music.amazon.com/search/${p.amazonId}" title="Amazon Music" target="_blank">♪</a>
+      </div>
+    </div>
+  `).join('');
+
+  showResultScreen();
+
+  const today = { day: 'Today', emoji: state.moodEmoji, mood: mood, color: state.moodColor };
+  state.history.push(today);
+  state.entries++;
+  state.streak++;
+  document.getElementById('streak-count').textContent = state.streak;
+  renderHistory();
+  renderInsights();
+}
+
+function showResultScreen() {
+  document.getElementById('screen-checkin-main').classList.remove('active');
+  document.getElementById('screen-results').classList.add('active');
+}
+
+function goBack() {
+  document.getElementById('screen-results').classList.remove('active');
+  document.getElementById('screen-checkin-main').classList.add('active');
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+  state.selectedMood = null;
+  document.getElementById('find-music-btn').disabled = true;
+  document.getElementById('mood-note').value = '';
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', ['checkin','history','insights','tools'][i] === tab));
+  const screens = ['screen-checkin-main','screen-results','screen-history','screen-insights','screen-tools'];
+  screens.forEach(s => document.getElementById(s).classList.remove('active'));
+  if (tab === 'checkin') document.getElementById('screen-checkin-main').classList.add('active');
+  else if (tab === 'history') { document.getElementById('screen-history').classList.add('active'); renderHistory(); }
+  else if (tab === 'insights') { document.getElementById('screen-insights').classList.add('active'); renderInsights(); }
+  else if (tab === 'tools') { document.getElementById('screen-tools').classList.add('active'); newAffirmation(); }
+}
+
+function renderHistory() {
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const grid = document.getElementById('history-grid');
+  grid.innerHTML = days.map(d => {
+    const entry = state.history.find(h => h.day === d);
+    if (entry) {
+      return `<div class="history-day has-entry" style="background:${entry.color}22; border-color:${entry.color}44">
+        <div class="h-emoji">${entry.emoji}</div>
+        <div class="h-label" style="color:${entry.color}">${d}</div>
+      </div>`;
+    }
+    return `<div class="history-day"><div class="h-label">${d}</div></div>`;
+  }).join('');
+
+  const log = document.getElementById('history-log');
+  const filled = state.history.filter(h => h.day !== 'Today');
+  log.innerHTML = filled.slice(-3).reverse().map(h => `
+    <div class="playlist-card" style="margin-bottom:8px">
+      <div class="playlist-art" style="background:${h.color}22;font-size:20px">${h.emoji}</div>
+      <div class="playlist-info">
+        <div class="playlist-name" style="font-size:13px">${h.day}</div>
+        <div class="playlist-desc">${h.mood.charAt(0).toUpperCase()+h.mood.slice(1)}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderInsights() {
+  const moodFreq = {};
+  state.history.forEach(h => { moodFreq[h.mood] = (moodFreq[h.mood]||0) + 1; });
+  const topMood = Object.entries(moodFreq).sort((a,b)=>b[1]-a[1])[0];
+  const topEmoji = topMood ? state.history.find(h=>h.mood===topMood[0]).emoji : '😌';
+  document.getElementById('most-common-emoji').textContent = topEmoji;
+  document.getElementById('avg-energy').textContent = '6.5';
+  document.getElementById('entries-count').textContent = state.entries;
+  document.getElementById('streak-num').textContent = state.streak;
+  const mood = state.selectedMood || 'calm';
+  const idx = Math.floor(Math.random() * affirmations.length);
+  document.getElementById('affirmation-text').textContent = affirmations[idx];
+}
+
+function newAffirmation() {
+  const idx = Math.floor(Math.random() * affirmations.length);
+  document.getElementById('tools-affirmation').textContent = affirmations[idx];
+}
+
+let breatheInterval = null, breathePhase = 0;
+const breathePhases = ['Breathe in', 'Hold', 'Breathe out', 'Hold'];
+const breatheDurations = [4000, 2000, 4000, 2000];
+
+function toggleBreathe() {
+  const btn = document.getElementById('breathe-btn');
+  const label = document.getElementById('breathe-label');
+  if (breatheInterval) {
+    clearInterval(breatheInterval);
+    clearTimeout(breatheInterval);
+    breatheInterval = null;
+    btn.textContent = 'Start breathing';
+    label.textContent = 'Breathe in';
+    label.style.animation = 'breathe-anim 4s ease-in-out infinite';
+  } else {
+    btn.textContent = 'Stop';
+    function nextPhase() {
+      label.textContent = breathePhases[breathePhase];
+      breathePhase = (breathePhase + 1) % 4;
+      breatheInterval = setTimeout(nextPhase, breatheDurations[breathePhase]);
+    }
+    nextPhase();
+  }
+}
+
+renderHistory();
+renderInsights();
+</script>
